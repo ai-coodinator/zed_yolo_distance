@@ -425,13 +425,15 @@ def main(argv):
 
     log.info("Running...")
 
-    # ---------------追加-------------------------------------------
+    distance_flg = 0
+    distance_flg = 0
+
     output_path = "distance.avi"
     isOutput = True if output_path != "" else False
     if isOutput:
         video_writer = cv2.VideoWriter(str(output_path),
                     cv2.VideoWriter_fourcc(*'XVID'),8,(1280, 720))
-    # ---------------追加-------------------------------------------
+    # ---------------追加終了-------------------------------------------
 
     key = ''
     while key != 113:  # for 'q' key
@@ -450,6 +452,12 @@ def main(argv):
             detections = detect(netMain, metaMain, image, thresh)
 
             log.info(chr(27) + "[2J"+"**** " + str(len(detections)) + " Results ****")
+            # ---------------追加開始-------------------------------------------
+            if detections == []:
+                distance_flg = 0
+            else:
+                distance_flg = distance_flg + 1
+            # ---------------追加終了-------------------------------------------
             for detection in detections:
                 label = detection[0]
                 confidence = detection[1]
@@ -476,15 +484,17 @@ def main(argv):
                               (x_coord + x_extent + thickness, y_coord + y_extent + thickness),
                               color_array[detection[3]], int(thickness*2))
 
-                # ---------------追加-----------------------------
+                # ---------------追加開始-----------------------------
                 print(label,str(distance)+ " m")
-                if float(distance) < 2.0:
+                if float(distance) >= 10.0:
+                    distance_flg = 0
+                if float(distance) < 5.0 and distance_flg > 20:
                     cv2.putText(image, 'Danger', (300, 350), cv2.FONT_HERSHEY_COMPLEX_SMALL, 8,
                     (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), 10, cv2.LINE_AA)
                     cv2.putText(image, label + " " +  str(distance) + " m", (300, 450 + line), cv2.FONT_HERSHEY_COMPLEX_SMALL, 3,
                     (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), 6, cv2.LINE_AA)
                     line = line + 60
-                # ---------------追加-----------------------------
+                # ---------------追加終了-----------------------------
 
             cv2.imshow("ZED", image)
 
